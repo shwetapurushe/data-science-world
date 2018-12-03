@@ -2,8 +2,11 @@
 title: "Visualizing the Central Limit Theorum"
 author: "Shweta Purushe"
 date: "06/1/2018"
-output: html_notebook
+output: github_document
 ---
+```{r}
+library(ggplot2)
+```
 
 
 ### Trials  
@@ -51,27 +54,27 @@ Our estimates, called sample means,  of the actual mean are pretty close as can 
 All of the above was for a single sample set, lets try it for say 200 sample sets of sample size n = 10
 
 
-```{r fig.width=10, fig.height=3}
+```{r fig.width=10, fig.height=3, fig.align='center'}
 # generate a list of 200 sample sets, each with a sample size of 10. 
 sample_reps = 200
 
 s_200_collection <- data.frame(replicate(sample_reps, mean(sample(1:6, 10, replace = T))))
+names(s_200_collection) <- "values"
 
-ggplot() + 
-aes(s_200_collection) + 
+ggplot( data = s_200_collection, aes(x = values) ) + 
 geom_histogram(binwidth=0.25, colour="black", fill="orange")  +
 xlab("Sample Means") + 
 labs(title= "Distribution of Sample Means with 200 sample sets of sample size n = 10")
 ```
 
-```{r fig.width=10, fig.height=3}
+```{r fig.width=10, fig.height=3, fig.align='center'}
 # generate a list of 200,000 sample sets, each with a sample size of 10. 
 sample_reps = 200000
 
 s_200000_collection <- data.frame(replicate(sample_reps, mean(sample(1:6, 10, replace = T))))
+names(s_200000_collection) <- "values"
 
-ggplot() + 
-aes(s_200000_collection) + 
+ggplot(data = s_200000_collection, aes(x = values))  + 
 geom_histogram(binwidth=0.25, colour="black", fill="salmon")  +
 xlab("Sample Means") + 
 labs(title= "Distribution of Sample Means with 20000 sample sets of sample size n = 10")
@@ -96,9 +99,9 @@ Now lets do the second part of the exercise which is to visualize the CLT as we 
 sample_size = 10
 
 s_10_collection <- data.frame(replicate(200, mean(sample(1:6, sample_size, replace = T))))
+names(s_10_collection) <- "values"
 
-ggplot() + 
-aes(s_10_collection) + 
+ggplot(data = s_10_collection, aes(x=values)) + 
 geom_histogram(binwidth=0.25, colour="black", fill="lightblue")  +
 xlab("Sample Means") + 
 labs(title= "Distribution of Sample Means with 200 sample sets of sample size n = 10")
@@ -115,9 +118,9 @@ labs(title= "Distribution of Sample Means with 200 sample sets of sample size n 
 sample_size = 500
 
 s_500_collection <- data.frame(replicate(200, mean(sample(1:6, sample_size, replace = T))))
+names(s_500_collection) <- "values"
 
-ggplot() + 
-aes(s_500_collection) + 
+ggplot(data=s_500_collection, aes(x=values )) + 
 geom_histogram(binwidth=0.25, colour="black", fill="turquoise")  +
 xlab("Sample Means") + 
 labs(title= "Distribution of Sample Means with 200 sample sets of sample size n = 500")
