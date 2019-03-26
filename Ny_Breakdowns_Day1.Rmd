@@ -1,8 +1,11 @@
 ---
-title: "Bus_Breakdown_NY"
+title: "New York Bus breakdown analysis by regions"
 author: "Shweta Purushe"
 date: "12/18/2018"
-output: html_document
+output:
+  html_document:
+    css: style.css
+    df_print: paged
 ---
 
 ```{r setup, include=FALSE}
@@ -17,6 +20,7 @@ library(maptools)
 library(ggmap)
 library(tmap)
 library(tidyr)
+suppressPackageStartupMessages(library(gridExtra))
 ```
 
 
@@ -24,15 +28,20 @@ library(tidyr)
 ```{r}
 # Questions I am trying to answer for geo region analysis 
 
-# Which Region is having the maximum incidents every year ? 
-#Which incidents ? Breakdowns or Running late 
-
-#Why? 
-# is it a company problem? 
-# are there too many schools being serviced 
-# reason for getting late --(in the data) 
+# Which Region has had the maximum incidents over time?
 
 # which region has improved/ done the same/ detriorated over years 
+
+#. Which incidents ? Breakdowns or Running late 
+
+#Why? 
+# Is there a relationship between the number of buses plying to each borough and the incidents -- unfortunately this data is not provided. 
+# Are the bus incidents a specific company problem? 
+# Are there too many schools being serviced ? 
+# Are there too many children on the bus route? (we unfortunately dont have enough data for this)
+# reason for getting late --(in the data)  
+
+
 
 # Which type of students are getting most affected in a region. 
 
@@ -48,25 +57,38 @@ bus_df %>% head()
 
 ```
 
+
+<br/>
+<br/>
+
+#### Which Region has had the maximum incidents over time?
 ```{r}
-# Which Region is having the maximum incidents? 
+# Which Region has had the maximum incidents over time?
 
 bus_df %>% 
   select(Boro, School_Year) %>% filter(!is.na(Boro), School_Year!='2019-2020') %>%
   group_by(School_Year, Boro)  %>% 
-  summarise(number_in = n()) %>%
-  filter(number_in == max(number_in))
+  summarise(n_of_incidents = n()) %>%
+  filter(n_of_incidents == max(n_of_incidents))
 ```  
 Looks like Bronx and Manhattan are the most affected regions across four years. 
 
 
-```{r fig.width=5, fig.height=4}
-#Which incidents ? Breakdowns or Running late 
+<br/>
+
+#### What are the major types of Incidents ? Are there more breakdowns or istances of buses runnning late?
+```{r fig.width=10, fig.height=7}
+
+# What are the major types of Incidents ? Are there more breakdowns or istances of buses runnning late?
+
+
 affected_regions <- bus_df %>% 
-  select(Boro, School_Year, Breakdown_or_Running_Late) %>% filter(!is.na(Boro), School_Year!='2019-2020') %>%
+  select(Boro, School_Year, Breakdown_or_Running_Late) %>% filter(!is.na(Boro), Boro != 'All Boroughs',  School_Year!='2019-2020') %>%
   count(School_Year, Boro, Breakdown_or_Running_Late) %>%
   rename(Num_of_Incidents = n)
 
+
+#plotting
 affected_regions %>%
   ggplot(aes(x =Boro, y= Num_of_Incidents, fill=Breakdown_or_Running_Late)) + 
   geom_bar(stat="identity", position = "dodge") + 
@@ -76,33 +98,49 @@ affected_regions %>%
 
 ```
 
-Hmm, as we saw above, it looks like in additon to Bronx and Manhattan, Brooklyn is a close third.  
-And Bronx and Brooklyn have more number of breakdowns compared to Manhattan.
+<br/>
+
+**Conclusions from the figure above**
+
+* Across all boroughs, buses are running late more than they're breaking down. 
+* As we see above, it looks like in additon to Bronx and Manhattan, Brooklyn is a close third.  
+* Bronx and Brooklyn have more number of breakdowns compared to Manhattan.
+
+<br/>
 
 
-Which region has improved/ done the same/ detriorated over years?  
+#### Which region has improved/ done the same/ detriorated over years?  
 And all regions have improved in their services from 2015 to 2018. (reduced number of incidents)
 
 
 
 <br/>
+
+
+Now that we have a slight idea of 'what' is happening, lets try to figure out WHY this is happening ? 
+
 <br/>
 
 
+***
 
+<br/>
 
-
-### Let us now look into investigating the reasons for bus incidents  
+#### Let us now look into investigating the reasons for bus incidents  
 ```{r}
 #Why? Answers to these questions could provide some clues. 
 
+# Is there a relationship between the number of buses plying to each borough and the incidents -- unfortunately this data is not provided. 
 # Are the bus incidents a specific company problem? 
 # are there too many schools being serviced ? 
 # Are there too many children on the bus route? (we unfortunately dont have enough data for this)
 # reason for getting late --(in the data) 
+```
 
 
 
+
+```{r}
 #Are the bus incidents a specific company problem? 
 # Lets see the distribution of incidents across the various bus companies
 
@@ -111,8 +149,13 @@ bus_df %>%
   group_by(Bus_Company_Name) %>% count()
 
 ```
-```{r fig.width=15, fig.height=5}
-# We need to clean up the bus company names a bit since the names are very nearly identical but not dont help in aggregating. For eg. ALL AMERICAN SCHOOL BUS C and ALL AMERICAN SCHOOL BUS CORP. are the same company. 
+
+```{r}
+# We need to clean up the bus company names a bit since the names are very nearly identical but dont help in aggregating. 
+#For eg. ALL AMERICAN SCHOOL BUS C and ALL AMERICAN SCHOOL BUS CORP. are the same company. 
+# This could be attributed to different people having different styles for entering the same company name 
+
+
 clean_bus_names <- bus_df %>% 
   select(Bus_Company_Name, Breakdown_or_Running_Late, Boro) %>% filter(Bus_Company_Name != '`', !is.na(Boro)) %>%
   mutate(Clean_BusCo_name = 
@@ -154,8 +197,54 @@ clean_bus_names <- bus_df %>%
                       )
          ) 
 
+x_dirty = clean_bus_names %>% select(Bus_Company_Name) %>% distinct() %>% count()
+x = clean_bus_names %>% select(Clean_BusCo_name) %>% distinct() %>% count()
+
+cat("Before cleaning number of bus companies :", x_dirty$n)
+cat("\nAfter cleaning number of bus companies: ", x$n)
+```
+
+```{r fig.width=20, fig.height=11}
+# Now lets look at the distribution with the clean company names
+company_incident_counts <- clean_bus_names %>% count(Clean_BusCo_name) %>% rename(Num_incidents = n) # this will give number of incidents per company 
+company_borough_counts <- clean_bus_names %>% group_by(Clean_BusCo_name)%>% distinct(Boro) %>% count() %>% rename(Num_boros = n) # number of distinct boroughs serviced by each company
+
+
+# Putting all this information together 
+all_company_info <- clean_bus_names %>% inner_join(company_incident_counts, by="Clean_BusCo_name") %>% inner_join(company_borough_counts, by="Clean_BusCo_name")
+
+comp_names = factor(as.character(all_company_info$Clean_BusCo_name), levels = unique(all_company_info$Clean_BusCo_name))
+
+#Plotting
+plot1 <- all_company_info %>% select(Clean_BusCo_name, Num_incidents, Breakdown_or_Running_Late)%>%distinct() %>%
+          ggplot(aes(x = reorder(Clean_BusCo_name, Num_incidents), y=Num_incidents, fill=Breakdown_or_Running_Late)) + geom_bar(stat="identity") + 
+          labs(x="Number of incidents (breakdowns and incidents)", y="Companies ordered by Number of Incidents", title="Trend of number of incidents for a bus company")+
+          coord_flip() +theme(legend.position = 'bottom')
+
+
+ 
+ 
+plot2 <- all_company_info%>%
+        ggplot(aes(x=reorder(comp_names, Num_incidents), y=Num_boros)) +
+        geom_point(aes(size=Num_boros)) + 
+        scale_size_continuous(
+                          breaks = seq(from=1, to=max(all_company_info$Num_boros), by=2),
+                          limits = c(0 , 12),
+                          labels = seq(from=1, to=max(all_company_info$Num_boros), by=2)
+                ) +
+        labs(x="Number of Boroughs a bus company serves", y="Companies ordered by Number of Incidents", title="Trend of number of boroughs a bus company serves")+
+        coord_flip() + theme(legend.position = 'bottom')
+
+
+
+grid.arrange(plot1, plot2, ncol=2)
+```
+
+
+
 
 ## gives us the number of boros a given company services
+```{r}
 b_s<- clean_bus_names %>%
   group_by(Clean_BusCo_name) %>%
   summarize(Boros_Serviced = paste(unique(Boro), collapse = ','), Num_Boros_Serviced = length(unique(Boro))) 
@@ -168,6 +257,7 @@ clean_bus_names %>%
           count(Clean_BusCo_name)%>% # number of incidents (breakdowns and late runnings) for a given company 
           arrange(desc(n)) %>%
   inner_join(b_s, by="Clean_BusCo_name") %>%
+  # PLOT
   ggplot(aes(x = Num_Boros_Serviced, y = n)) + 
   geom_point() + 
   labs(title ="Relationship between number of boros serviced by a company with the number of incidents", x="Number of Boros Serviced", y="Number of Incidents") +
@@ -307,58 +397,58 @@ num_sc %>%
 ```{r}
 #3. counties and routes with maxiumum schools affected 
 
-(places <- bus_df %>% select(Boro)%>%unique() %>% filter(Boro != 'All Boroughs' & !is.na(Boro)))
+#(places <- bus_df %>% select(Boro)%>%unique() %>% filter(Boro != 'All Boroughs' & !is.na(Boro)))
 ```
 
 ```{r}
 #https://www1.nyc.gov/site/planning/data-maps/open-data/districts-download-metadata.page
-ny_boros <- readOGR("/Users/spurushe/Downloads/nybb_18d/nybb.shp")
+#ny_boros <- readOGR("/Users/spurushe/Downloads/nybb_18d/nybb.shp")
 
 
 #https://www.census.gov/geo/maps-data/data/cbf/cbf_counties.html
-ny_counties <- readOGR("/Users/spurushe/Downloads/cb_2017_us_county_20m/cb_2017_us_county_20m.shp")
+#ny_counties <- readOGR("/Users/spurushe/Downloads/cb_2017_us_county_20m/cb_2017_us_county_20m.shp")
 ## Rockland
-rockland_c <- ny_counties$NAME == "Rockland" & ny_counties$STATEFP == "36" & ny_counties$COUNTYFP == "087"
-rc_ex <- ny_counties[rockland_c, ]
+#rockland_c <- ny_counties$NAME == "Rockland" & ny_counties$STATEFP == "36" & ny_counties$COUNTYFP == "087"
+#rc_ex <- ny_counties[rockland_c, ]
 
 ## Nassau
-nassau_c <- ny_counties$NAME == "Nassau" & ny_counties$STATEFP == "36" & ny_counties$COUNTYFP == "059"
-ns_ex <- ny_counties[nassau_c, ]
+#nassau_c <- ny_counties$NAME == "Nassau" & ny_counties$STATEFP == "36" & ny_counties$COUNTYFP == "059"
+#ns_ex <- ny_counties[nassau_c, ]
 
 ## Westchester 
-westchester_c <- ny_counties$NAME == "Westchester" & ny_counties$STATEFP == "36" & ny_counties$COUNTYFP == "119"
-ws_ex <- ny_counties[westchester_c, ]
+#westchester_c <- ny_counties$NAME == "Westchester" & ny_counties$STATEFP == "36" & ny_counties$COUNTYFP == "119"
+#ws_ex <- ny_counties[westchester_c, ]
 
 
 
 
 #extracting one state from all states shape file
-all_states <- readOGR("/Users/spurushe/Downloads/cb_2017_us_state_20m/cb_2017_us_state_20m.shp")
-names(all_states) 
-all_states[["NAME"]] # use this to find the index of the state you want 
+#all_states <- readOGR("/Users/spurushe/Downloads/cb_2017_us_state_20m/cb_2017_us_state_20m.shp")
+#names(all_states) 
+#all_states[["NAME"]] # use this to find the index of the state you want 
 
 
 #Connecticut
-con <- all_states$NAME == "Connecticut"
-con_ex <- all_states[con, ] #extract connecticut
+#con <- all_states$NAME == "Connecticut"
+#con_ex <- all_states[con, ] #extract connecticut
 
 #New Jersey 
-nj <- all_states$NAME == "New Jersey"
-nj_ex <- all_states[nj, ]
+#nj <- all_states$NAME == "New Jersey"
+#nj_ex <- all_states[nj, ]
 
 ```
 
 ```{r}
-affected_regions%>%filter(Boro == 'Connecticut', School_Year == '2015-2016')
+#affected_regions%>%filter(Boro == 'Connecticut', School_Year == '2015-2016')
 
 ## Getting areas of all the geo regions
-reg <- c(rc_ex, ns_ex, ws_ex, con_ex, nj_ex) # excluding ny_boros due to the method of extraction using shape files
+#reg <- c(rc_ex, ns_ex, ws_ex, con_ex, nj_ex) # excluding ny_boros due to the method of extraction using shape files
 
-areas <- sapply(reg, gArea)
-names <- sapply(reg, function(x){slot(x, "data")$NAME})
+#areas <- sapply(reg, gArea)
+#names <- sapply(reg, function(x){slot(x, "data")$NAME})
 
-d <- data.frame(BoroName = names, Shape_Area = areas)
-rownames(d) <- NULL
+#d <- data.frame(BoroName = names, Shape_Area = areas)
+#rownames(d) <- NULL
 
 # ny_area <- slot(ny_boros, "data")[, c("BoroName", "Shape_Area")]
 # rownames(ny_area) <- NULL
@@ -368,25 +458,25 @@ rownames(d) <- NULL
 ```{r}
 # adding the respective data to the corresponding geo regions
 
-x = affected_regions %>% 
-  filter(!Boro %in% c("New Jersey", "Connecticut", "Westchester", "Rockland County", "Nassau County", "All Boroughs"))
+#x = affected_regions %>% 
+  #filter(!Boro %in% c("New Jersey", "Connecticut", "Westchester", "Rockland County", "Nassau County", "All Boroughs"))
          
          
-ny_data <- sp::merge(ny_boros, x, by.x = "BoroName", by.y = "Boro", duplicateGeoms = TRUE)
+#ny_data <- sp::merge(ny_boros, x, by.x = "BoroName", by.y = "Boro", duplicateGeoms = TRUE)
 
 ```
 
 
 
 ```{r}
-all <-  tm_shape(ny_data) + tm_borders() + tm_fill("incidents_by_buses", n= 10) + tm_text("BoroName")
+#all <-  tm_shape(ny_data) + tm_borders() + tm_fill("incidents_by_buses", n= 10) + tm_text("BoroName")
         # tm_shape(con_ex) + tm_borders() + 
         # tm_shape(nj_ex) + tm_borders() + 
         # tm_shape(rc_ex) + tm_borders() + 
         # tm_shape(ns_ex) + tm_borders() + 
         # tm_shape(ws_ex) + tm_borders()
-all
-ttm()
+#all
+#ttm()
 ```
 
 
