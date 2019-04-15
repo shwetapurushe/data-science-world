@@ -10,4 +10,6 @@ Its arranged as follows :
     * the data used for all these analyses (unless its sensitive data)
 2. One of analyses usually demonstrating a quick demo of a library, technique or concept. Some are complete, some ...meh!
 
+Please remember that most of the projects are work in progress(w.i.p) unless specified so..**because a data science project never ends**(err....also I work on these during off hours and when Im not day dreaming.)
+
      
