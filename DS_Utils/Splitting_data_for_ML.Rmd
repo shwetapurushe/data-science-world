@@ -1,0 +1,148 @@
+---
+title: "Splitting data for ML in R or in SQL"
+author: Shweta Purushe
+output: html_notebook
+---
+
+
+
+```{r}
+## Random sampling
+```
+
+
+
+```{r}
+### USING A probability distribution
+# Look/explore the data
+str(grade)
+
+# Randomly assign rows to ids (1/2/3 represents train/valid/test)
+# This will generate a vector of ids of length equal to the number of rows
+# The train/valid/test split will be approximately 70% / 15% / 15% 
+set.seed(1)
+assignment <- sample(1:3, size = nrow(grade), prob = c(0.7, 0.15, 0.15), replace = TRUE)
+
+# Create a train, validation and tests from the original data frame 
+grade_train <- grade[assignment == 1, ]    # subset the grade data frame to training indices only
+grade_valid <- grade[assignment == 2, ]  # subset the grade data frame to validation indices only
+grade_test <- grade[assignment == 3, ]   # subset the grade data frame to test indices only
+```
+
+
+
+
+
+```{r}
+# Randomly order the data frame
+# One way you can take a train/test split of a dataset is to order the dataset randomly, then divide it into the two sets. This ensures that the training set and test set are both random samples and that any biases in the ordering of the dataset (e.g. if it had originally been ordered by price or size) are not retained in the samples we take for training and testing your models. You can think of this like shuffling a brand new deck of playing cards before dealing hands.
+# 
+# First, you set a random seed so that your work is reproducible and you get the same random split each time you run your script
+
+
+# Set seed
+set.seed(42)
+
+# Shuffle row indices: rows
+rows = sample(nrow(diamonds)) ## gives us a vector of randomly shuffled row indices
+
+# Randomly order data # reordering the original dataframe using the new row indices
+diamonds = diamonds[rows, ]
+```
+
+
+
+```{r}
+## TRy the 75/25 split
+
+###  Lets use 75% of the sample set for training the model constructed
+
+##Creating a train/test split for sampling  --- CAN USE THE EVALUATION SCHEME IN the recommenderlab package instead. 
+
+#1. get the number of rows 
+n = nrow(dataset)
+
+# number of rows for the training set (75% of the dataset)
+n_train = round(0.75 * n)
+
+
+# create a vector of indices which is an 80% random sample
+set.seed(123) # set a random seed for reproducibility
+train_indices <- sample(1:n, n_train) ## sample n_train number of data points from 1 to n
+
+
+ratings_train = dataset[train_indices, ]
+
+ratings_test = dataset[-train_indices, ]
+
+
+OR
+
+
+# Determine row to split on: split
+n_train = round(nrow(diamonds) * 0.8)
+
+# Create train
+train = diamonds[1:n_train, ]
+
+# Create test
+test = diamonds[(n_train + 1):nrow(diamonds), ]
+```
+
+
+## ALL ABOVE METHODS WERE MANUAL and it was a single split
+## presence of any outliers will vastly affect the out of sample RMSE
+
+```{r CROSS VALIDATION}
+## MULTIPLE TRAIN?TEST SET SPLITS
+## Cross validation gives us multiple estimates of the out-of-sample error 
+## We throw away the randomely tested cross validated models and use the FINAL model which is then trained on the whole dataset
+## hence cross validation is very expensive 11x times 10 cross validated models + 1 final model
+
+## If all of your estimates of RMSE give similar outputs, you can be more certain of the model's accuracy. If your estimates give different outputs, that tells you the model does not perform consistently and suggests a problem with it.
+
+
+
+## Use multiple systematic test sets,instead of a SINGLE random train/test split ---- cross validation autimatically takes care of this.
+
+
+
+```
+
+
+
+
+```{r MODEL EVALUATION}
+## Linear regression : most often used RMSE 
+
+## Classficiation: confusion matrix
+# a confusion matrix is a very useful tool for calibrating the output of a model and examining all possible outcomes of your predictions (true positive, true negative, false positive, false negative).
+
+## True positive rate == sensitivity
+## True negative rate  == Specificity
+
+
+
+
+
+
+## Class cutoff threshold probability ---we can use a variety of threshold values 
+ #a threshold of 0.50 to cut your predicted probabilities to make class predictions (rock vs mine). 
+## knowing this threshold before analysis is not possible, we hvae to keep experimenting 
+
+## a higher threshold wll give us more certainty as it is a stricter cut off  ---- lower false positive rates
+## a lower threshold will give us lesser accuracy, it is an over estimation , more relaxed cut off hence higher false positive values
+
+## exercise of balancing true positive rate and false positive rate
+## ultimate choice will depend on cost benefit analysis of problem at hand
+
+##Use confusion matrices to get right threshold
+#Predicted classes are based off of predicted probabilities plus a classification threshold.
+
+
+
+#predicted_probabilities is what the model output is
+#ifelse(predicted_probabilities > cut off threshold, "postive_class", "negative_class")
+#confusionMatrix(predicted, Test$actual)
+
+```
