@@ -1,3 +1,10 @@
 .idea
 *.iml
 .*Rhistory
+input_data/
+*.html
+*.nb.html
+*.xlsx
+*.xls
+logs/
+.ipynb_checkpoints

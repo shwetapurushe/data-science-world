@@ -8,8 +8,11 @@ Its arranged as follows :
     * Machine Learning Prediction algorithms 
     * Dashboards 
     * the data used for all these analyses (unless its sensitive data)
-2. One of analyses usually demonstrating a quick demo of a library, technique or concept. Some are complete, some ...meh!
+2. One off analyses usually demonstrating a quick demo of a library, technique or concept. 
+    * If the goal of the notebook is to explain a technique, then the choice of data is deliberately simple (for e.g. iris, cars). I feel this prevents focus on the data and enables the reader to 
+focus on the technique.  
+    * Some are complete, some ...meh!
 
-Please remember that most of the projects are work in progress(w.i.p) unless specified so..**because a data science project never ends**(err....also I work on these during off hours and when Im not day dreaming.)
+Please remember that most of the projects are work in progress(w.i.p) unless specified so..**because a data science project never ends** (err....also I work on these during off hours and when Im not day dreaming.)
 
      
