@@ -13,8 +13,8 @@ Its arranged as follows :
 focus on the technique.  
     * Some are complete, some ...meh!
 
-https://placehold.it/150/ffffff/ff0000?text=Important
-<font color=GREEN>To-Dos in green. Ill try revisiting whenever i can.</font>
+![#1589F0](https://placehold.it/100/FFF/FF00?text=Important notes in Red.)  
+![#1589F0](https://placehold.it/100/FFF/3CB371?text=Important notes in Red.)  
 Please remember that most of the projects are work in progress(w.i.p) unless specified so..**because a data science project never ends** (err....also I work on these during off hours and when Im not day dreaming.)
 
      
