@@ -13,8 +13,8 @@ Its arranged as follows :
 focus on the technique.  
     * Some are complete, some ...meh!
 
-![#1589F0](https://placehold.it/100/FFF/FF00?text=Important notes in Red.)  
-![#1589F0](https://placehold.it/100/FFF/3CB371?text=Important notes in Red.)  
+Important notes in red.    
+TODOs in green. Ill revisit whenever I can.    
 Please remember that most of the projects are work in progress(w.i.p) unless specified so..**because a data science project never ends** (err....also I work on these during off hours and when Im not day dreaming.)
 
      
