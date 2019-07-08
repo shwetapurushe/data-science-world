@@ -1,14 +1,19 @@
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-
 import plotly.graph_objs as go
+
+import pandas as pd;
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 
-#BAR CHART INFO
+# **** Data preprocessing ***** 
 
+
+
+
+#BAR CHART INFO
 #one series
 trace1 = go.Bar(
     x = ["Mon", "Tue", "Wed", "Thur", "Fri", "Sat", "Sun"], 
