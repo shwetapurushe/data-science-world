@@ -4,4 +4,5 @@ to categorize them into
     * everyday EDA visualizations 
     * advanced complex visualizations 
 * Data cleaning/transforming functions 
+* Playground notebooks when Im learning something
 * Other utils 
