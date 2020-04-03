@@ -1,0 +1,15 @@
+20/02/25 16:02:14 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+20/02/25 16:02:17 WARN Main$$anon$1: No external magics provided to PluginManager!
+20/02/25 16:02:21 WARN ScalaInterpreter: kernel variable: org.apache.toree.boot.layer.StandardComponentInitialization$$anon$1@3983235
+20/02/25 16:02:21 WARN ScalaInterpreter: Binding List(@transient implicit) kernel org.apache.toree.kernel.api.Kernel org.apache.toree.boot.layer.StandardComponentInitialization$$anon$1@3983235
+20/02/25 16:02:24 WARN KernelOutputStream: Suppressing empty output: ''
+20/02/25 16:07:30 WARN KernelOutputStream: Suppressing empty output: ''
+20/02/25 16:07:34 WARN KernelOutputStream: Suppressing empty output: ''
+20/02/25 16:07:44 WARN KernelOutputStream: Suppressing empty output: ''
+20/02/25 16:07:49 WARN KernelOutputStream: Suppressing empty output: ''
+20/02/25 16:07:59 WARN KernelOutputStream: Suppressing empty output: ''
+20/02/25 16:11:12 WARN KernelOutputStream: Suppressing empty output: ''
+20/02/25 16:11:29 WARN KernelOutputStream: Suppressing empty output: ''
+20/02/25 16:11:37 WARN KernelOutputStream: Suppressing empty output: ''
+20/02/25 16:11:46 WARN KernelOutputStream: Suppressing empty output: ''
+20/02/25 16:12:05 WARN KernelOutputStream: Suppressing empty output: ''

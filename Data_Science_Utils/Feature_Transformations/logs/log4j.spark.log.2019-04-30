@@ -1,0 +1,4 @@
+19/04/30 05:32:49 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+19/04/30 06:39:53 WARN HeartbeatReceiver: Removing executor driver with no recent heartbeats: 191257 ms exceeds timeout 120000 ms
+19/04/30 06:39:53 ERROR TaskSchedulerImpl: Lost executor driver on localhost: Executor heartbeat timed out after 191257 ms
+19/04/30 06:39:53 WARN SparkContext: Killing executors is not supported by current scheduler.
