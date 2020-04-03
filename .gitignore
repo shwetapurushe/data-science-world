@@ -1,10 +1,6 @@
+spark-warehouse/*
 .idea
+logs/*
 *.iml
-.*Rhistory
-input_data/
-*.html
-*.nb.html
-*.xlsx
-*.xls
-logs/
-.ipynb_checkpoints
+.Rhistory
+.log
