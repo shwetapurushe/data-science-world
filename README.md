@@ -1,8 +1,3 @@
----
-output:
-  html_document: default
-  pdf_document: default
----
 # data-science-world
 
 This is meant to be a showcase of stuff I'm playing around with, struggling with or obsessing about.  
