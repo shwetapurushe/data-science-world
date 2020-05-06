@@ -1,0 +1,234 @@
+---
+title: "Visualizing Feature Importance"
+author: "Shweta Purushe"
+date: "8/27/2018"
+output:
+   html_document:
+     css: style.css
+     df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+<br/>
+<br/>
+
+### Some background information
+
+> Feature selection is an important part of machine learning and statistics.  
+It is believed that your machine learning algorithm or your analysis is as good as your feature selection is. It provides a very compressed high level insight into your model's behavior.  
+
+<br/>
+
+> That is where all the magic sauce is.  And there are entire books published on this **some-part-of-it-is-science-some-of-it-is-art** aspect of data science. 
+
+<br/>
+
+Feature selection may be done by either one or a combination of the following done by  
+
+1. selecting all or a subset of original raw data dimensions --> Raw data dimensions
+2. engineering new features (using various techniques) --> Derived data features
+    
+<br/>
+Of all the features that might be used for analysis or to train your machine learning (ML) algorithm, obviously some may be more important than others in determining the suitability of the algorithm.    
+**Suitability of an algorithm will be decided by the problem we are trying to solve.**
+
+
+
+### Lets get started 
+
+```{r include=FALSE}
+suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages(library(ggplot2))
+suppressPackageStartupMessages(library(ggpubr))
+suppressPackageStartupMessages(library(reshape2))
+suppressPackageStartupMessages(library(superheat))
+suppressPackageStartupMessages(library(Rcpp))
+```
+
+
+> So when I thought about it, my initial ideas coincided with what people ordinarily use for checking feature importance for a particular analysis.  
+It's usually a bar chart or some variation thereof (lollipop plots, dot plots). 
+
+<br/>
+
+Lets create our case.  
+
+> Lets say we have an algorithm that uses 51 features. 
+
+
+Lets say our data has the following structure
+```{r}
+f_data <- read.csv("/Users/spurushe/Documents/data-science-world/Feature_Selection.csv", stringsAsFactors=FALSE)
+dim(f_data)
+head(f_data)
+```
+
+For simplicity lets just consider Week 1. It contains the features and thier importance for one iteration of an algorithm. 
+```{r}
+f_data_Week1 <- f_data %>%select(Feature , Week1)
+head(f_data_Week1)
+```
+
+<br/>
+
+> Now lets get started with some visualizations. 
+
+<br/>
+
+Ordinarily let us start with the simplest of them all,  a bar chart. 
+```{r }
+## We need to do this because ggplot hijacks the order of the labels. 
+f_data_Week1$label_order <- factor(f_data_Week1$Feature, levels= f_data_Week1$Feature)
+
+g = ggplot(f_data_Week1, aes(x= label_order, y=Week1))
+g + geom_col() + xlab("Features") + theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
+```
+
+That looks right! So we could say that for this algorithm, the most important features are Feature 1, Feature 2, Feature 3, Feature 4 and Feature 5. Five features in total.  
+
+<br/>
+Lets try looking at another commonly used, slightly different visualization called the **Lollipop** chart. 
+```{r}
+
+ggdotchart(f_data_Week1, x = "label_order", y = "Week1", xlab= "Features",
+           sorting = "descending",                        # Sort value in descending order
+           add = "segments",                             # Add segments from y = 0 to dots
+           ggtheme = theme_pubr() ## or theme_gray()                       # ggplot2 theme
+           )
+```
+
+
+
+Hmm, slightly different in the way that it DOES plot the '0' value of features 6-51. 
+
+<br/>
+Another commonly used slight variation, the **Dot** chart
+```{r}
+## Plain dot chart 
+ggdotchart(f_data_Week1, x = "label_order", y = "Week1", xlab= "Features",
+           sorting = "descending",                        # Sort value in descending order
+           add = "none",                             # Add segments from y = 0 to dots
+           ggtheme = theme_pubr() ## or theme_gray()                       # ggplot2 theme
+           )
+
+```
+
+> These are all great ways to visualize feature importance for a *single* algorithm run or analysis. 
+
+
+<br/>
+
+>Now what if we increase the complexity a little bit.  
+Say we had to compare several algorithm runs ,  
+for example we had to compare 10 iterations or compare it across different time points.
+The algorithm or some variation of it is run every week for 16 weeks and the features' importance change every week.  
+
+> AND the important feature ids change every week.  Meaning every week different features are important for the same algorithm.
+
+> AND the number of important features changes every week. (Come on Shweta!! Get outta here!!)
+
+>Would you render 10 plots? one for each algorithm iteration or time point? Things could get hairy beyond two/three plots. 
+
+
+One data feature across multiple iterations or across multiple time points. What word comes to mind? huh?
+
+> A *trend* across multiple instances. 
+
+Lets try looking into visualizing a *trend* using a **Line chart**.
+```{r}
+## We will now be using the original dataset from f_data
+
+#Lets take a recap of how it looked 
+head(f_data)
+```
+
+<br/>
+We will need to 'melt' our data i.e. convert it into a long format for using a Line chart in ggplot2. 
+```{r}
+f_melt <- melt(f_data)
+names(f_melt) = c("Feature", "Week", "Feature_Importance")
+
+#Lets see what it looks like now.
+f_melt
+```
+
+Now lets try visualizing a trend of one Feature. 
+```{r}
+f_1 <- f_melt %>% filter(Feature == 'Feature1') %>% select(Feature, Week, Feature_Importance)
+
+f_1
+```
+
+```{r}
+ggplot() + geom_line(aes(y = Feature_Importance, x = Week, group = Feature, color=Feature)
+                     , size=1.5
+                     ,data = f_1, stat="identity") +
+                     labs( title= "Trend of Feature Importance for Feature 1 across 16 weeks") +
+                      theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
+
+```
+
+That looks about right. 
+
+<br/>
+
+```{r}
+# Now lets try this for all features! 
+ggplot() + geom_line(aes(y = Feature_Importance, x = Week, group = Feature, color=Feature)
+                     , size=1.5
+                     ,data = f_melt, stat="identity") +
+                     labs( title= "Trend of Feature Importance across 16 weeks") +
+                      theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
+
+```
+<br/>
+
+> Precisely my point. It gets hairy very quickly! Especially if there is an overlap of values. 
+
+<br/>
+
+> Which brought me to my final visualization, something I came up with to solve this exact problem. It isn't anything novel in terms of visualization, but it has a good application to monitoring feature importance of a model across multiple iterations or time points. 
+
+```{r dpi = 200}
+f_data_num <- f_data[-1];
+
+rownames(f_data_num) <- NULL
+
+rownames(f_data_num) <- f_data[1]$Feature
+
+superheat(f_data_num, 
+          left.label.size = 0.2, 
+          left.label.text.size = 2, 
+          bottom.label.size = 0.2,
+          bottom.label.text.size = 2,
+          bottom.label.text.angle= 90,
+          ## color ramp
+          heat.col.scheme = "red",
+          ##titles
+          title = "Feature Importance of Algorithm across time",title.size = 3,
+          row.title = "Features", row.title.size = 2,
+          column.title = "Time in weeks",column.title.size = 2,
+          ## bar plot
+          yt = apply(f_data_num, 2, function(x){ length(x[x!= 0])}),
+          yt.plot.type = "bar",
+          #yt.t
+          yt.axis.name = "# of Important Features",
+          yt.axis.name.size = 6,
+          yt.obs.col=rep("cadetblue3", ncol(f_data_num)),
+          legend.text.size = 6,
+          grid.vline = FALSE
+          )
+
+
+
+```
+
+<br/>
+From the above figure we can conclude the following: 
+
+> For a particular week we can see the most important features , varying in their importance. 
+> We can observe the different important features across all weeks ( iterations in the case of multiple algorithm runs). 
+> The bar chart with the blue bars shows the number of important feature for every week /iteration. Ideally we would like to use the algorithm  ietration which uses the maximum number of important features. 
