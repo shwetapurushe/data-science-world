@@ -4,3 +4,4 @@ logs/*
 *.iml
 .Rhistory
 .log
+input_data/*
